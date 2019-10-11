@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.butterfly</groupId>
+            <artifactId>butterfly-common</artifactId>
+            <version>${version.butterfly-common}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
