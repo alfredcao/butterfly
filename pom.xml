@@ -7,10 +7,6 @@
     <groupId>org.butterfly</groupId>
     <artifactId>butterfly-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <modules>
-        <module>butterfly-common</module>
-        <module>butterfly-rpc</module>
-    </modules>
     <packaging>pom</packaging>
     <name>butterfly</name>
     <description>butterfly</description>
@@ -23,10 +19,10 @@
 
 
     <!-- ################################ 子模块 ################################ -->
-<!--    <modules>-->
-<!--        <module>butterfly-common</module>-->
-<!--        <module>butterfly-rpc</module>-->
-<!--    </modules>-->
+    <modules>
+        <module>butterfly-common</module>
+        <module>butterfly-rpc</module>
+    </modules>
 
     <!-- ################################ 属性配置 ################################ -->
     <properties>
