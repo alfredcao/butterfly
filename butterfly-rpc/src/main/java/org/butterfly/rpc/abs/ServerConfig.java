@@ -6,4 +6,15 @@ package org.butterfly.rpc.abs;
  * @date 2019-10-11 17:37
  */
 public interface ServerConfig {
+    /**
+     * 获取服务器名称
+     * @return 服务器名称
+     */
+    String getName();
+
+    /**
+     * 获取服务器监听端口号
+     * @return 端口号
+     */
+    int getPort();
 }

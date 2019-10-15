@@ -25,6 +25,7 @@ public abstract class AbstractServer implements Server {
             try {
                 this.config = config;
                 this.doInit();
+                this.statusInfo.setStatus(Status.INIT);
                 return true;
             } catch (Throwable e){
                 log.error("初始化服务器异常！", e);
@@ -38,11 +39,12 @@ public abstract class AbstractServer implements Server {
     @Override
     public final boolean start() {
         synchronized (this) {
-            if(!Status.INIT.equals(this.statusInfo)){
+            if(!Status.INIT.equals(this.statusInfo.getStatus())){
                 throw new IllegalStateException(String.format("服务器非%s状态不可执行启动操作！", Status.INIT.getName()));
             }
             try {
                 this.doStart();
+                this.statusInfo.setStatus(Status.START);
                 return true;
             } catch (Throwable e){
                 log.error("启动服务器异常！", e);
@@ -56,11 +58,12 @@ public abstract class AbstractServer implements Server {
     @Override
     public final boolean stop() {
         synchronized (this) {
-            if(!Status.START.equals(this.statusInfo)){
+            if(!Status.START.equals(this.statusInfo.getStatus())){
                 throw new IllegalStateException(String.format("服务器非%s状态不可执行停止操作！", Status.START.getName()));
             }
             try {
                 this.doStop();
+                this.statusInfo.setStatus(Status.STOP);
                 return true;
             } catch (Throwable e){
                 log.error("停止服务器异常！", e);
