@@ -23,7 +23,6 @@ import org.butterfly.rpc.model.constant.Constant;
 public class NettyServer extends AbstractServer {
     private EventLoopGroup boss;
     private EventLoopGroup worker;
-    private ServerBootstrap serverBootstrap;
 
     @Override
     protected void doStart() throws Throwable {
@@ -31,27 +30,37 @@ public class NettyServer extends AbstractServer {
 
         this.boss = new NioEventLoopGroup();
         this.worker = new NioEventLoopGroup();
-        this.serverBootstrap = new ServerBootstrap();
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
 
-        // 配置服务器
-        this.serverBootstrap.group(this.boss, this.worker)
-                .channel(NioServerSocketChannel.class)
-                .childOption(ChannelOption.SO_BACKLOG, 1024)
-                .childOption(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new LoggingHandler())
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        socketChannel.pipeline().addLast(new NettyServerHandler(config));
-                    }
-                });
-        this.serverBootstrap.bind(this.config.getPort()).sync();
-        log.info("{}服务器【{}】已注册监听端口 {} 成功！", Constant.LOG_PREFIX, this.config.getName(), this.config.getPort());
+        try {
+            // 配置服务器
+            serverBootstrap.group(this.boss, this.worker)
+                    .channel(NioServerSocketChannel.class)
+                    .childOption(ChannelOption.SO_BACKLOG, 1024)
+                    .childOption(ChannelOption.TCP_NODELAY, true)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .handler(new LoggingHandler())
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            socketChannel.pipeline().addLast(new NettyServerHandler(config));
+                        }
+                    });
+            serverBootstrap.bind(this.config.getPort()).sync();
+            log.info("{}服务器【{}】已注册监听端口 {} 成功！", Constant.LOG_PREFIX, this.config.getName(), this.config.getPort());
+        } catch (Throwable t){
+            this.releaseResource();
+            throw t;
+        }
+
     }
 
     @Override
     protected void doStop() throws Throwable {
+        this.releaseResource();
+    }
+
+    private void releaseResource(){
         if(this.boss != null){
             this.boss.shutdownGracefully().syncUninterruptibly();
         }

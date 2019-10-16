@@ -1,10 +1,15 @@
 package org.butterfly.rpc.component.netty;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.butterfly.common.util.CheckUtil;
 import org.butterfly.rpc.abs.ServerConfig;
+import org.butterfly.rpc.model.constant.Constant;
+
+import java.net.SocketAddress;
 
 /**
  * 服务端处理器
@@ -22,6 +27,14 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     public void setConfig(ServerConfig config){
         CheckUtil.checkNotNull(config, "server config");
         this.config = config;
+    }
+
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        Channel channel = ctx.channel();
+        SocketAddress address = channel.remoteAddress();
+        ChannelId channelId = channel.id();
+        log.info("{}通道注册至服务器【{}】成功！通道信息 -> 通道ID：{}，远程地址 -> {}", Constant.LOG_PREFIX, this.config.getName(), channelId.asLongText(), address.toString());
     }
 
     @Override
