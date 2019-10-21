@@ -21,22 +21,22 @@ public interface Client {
     boolean init(ClientConfig config);
 
     /**
-     * 启动客户端
-     * @return 启动是否成功
+     * 连接
+     * @return 连接是否成功
      */
-    boolean start();
+    boolean connect();
 
     /**
-     * 停止客户端
-     * @return 停止是否成功
+     * 断开连接
+     * @return 断开连接是否成功
      */
-    boolean stop();
+    boolean disconnect();
 
     /**
      * 获取客户端状态信息
      * @return 客户端状态信息
      */
-    StatusInfo statusInfo();
+    StatusInfo status();
 
 
     @Getter@Setter
@@ -57,10 +57,10 @@ public interface Client {
         NEW(1, "新建"),
         INIT(10, "初始化"),
         INIT_EXCEPTION(11, "初始化异常"),
-        START(20, "启动"),
-        START_EXCEPTION(21, "启动异常"),
-        STOP(30, "停止"),
-        STOP_EXCEPTION(31, "停止异常");
+        CONNECT(20, "连接"),
+        CONNECT_EXCEPTION(21, "连接异常"),
+        DISCONNECT(30, "断开连接"),
+        DISCONNECT_EXCEPTION(31, "断开连接异常");
 
         private int code;
         private String name;
