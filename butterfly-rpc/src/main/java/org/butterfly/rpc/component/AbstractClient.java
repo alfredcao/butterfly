@@ -11,7 +11,7 @@ import org.butterfly.rpc.abs.ClientConfig;
  * @date 2019-10-16 09:51
  */
 @Slf4j
-public class AbstractClient implements Client {
+public abstract class AbstractClient implements Client {
     private final StatusInfo statusInfo = new StatusInfo(Status.NEW, null);
     @Getter
     protected ClientConfig config;
@@ -47,7 +47,7 @@ public class AbstractClient implements Client {
                 this.statusInfo.setStatus(Status.CONNECT);
                 return true;
             } catch (Throwable e){
-                log.error("客户端连接服务器【地址 -> {}，端口 -> {}】异常！errMsg -> {}", this.config.getServerAddress(), this.config.getServerPort(), e);
+                log.error("客户端连接服务器【地址 -> {}，端口 -> {}】异常！", this.config.getServerAddress(), this.config.getServerPort(), e);
                 this.statusInfo.setStatus(Status.CONNECT_EXCEPTION);
                 this.statusInfo.setCause(e);
             }
@@ -72,23 +72,25 @@ public class AbstractClient implements Client {
             }
         }
         return false;
-    }/**
+    }
+
+    /**
      * 执行初始化操作
      * @throws Throwable
      */
-    protected void doInit() throws Throwable {}
+    protected abstract void doInit() throws Throwable;
 
     /**
      * 执行启动操作
      * @throws Throwable
      */
-    protected void doConnect() throws Throwable {}
+    protected abstract void doConnect() throws Throwable;
 
     /**
      * 执行停止操作
      * @throws Throwable
      */
-    protected void doDisconnect() throws Throwable {}
+    protected abstract void doDisconnect() throws Throwable;
 
     @Override
     public StatusInfo status() {
