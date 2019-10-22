@@ -63,10 +63,18 @@ public class NettyServer extends AbstractServer {
     private void releaseResource(){
         if(this.boss != null){
             this.boss.shutdownGracefully().syncUninterruptibly();
+            this.boss = null;
         }
         if(this.worker != null){
             this.worker.shutdownGracefully().syncUninterruptibly();
+            this.worker = null;
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        this.releaseResource();
     }
 
     public static void main(String[] args) {

@@ -1,6 +1,8 @@
 package org.butterfly.rpc.component.netty;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -10,6 +12,8 @@ import org.butterfly.rpc.abs.Client;
 import org.butterfly.rpc.abs.ClientConfig;
 import org.butterfly.rpc.component.AbstractClient;
 import org.butterfly.rpc.model.constant.Constant;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * netty客户端
@@ -49,21 +53,34 @@ public class NettyClient extends AbstractClient {
 
     @Override
     protected void doDisconnect() throws Throwable {
-
+        this.releaseResource();
     }
 
     private void releaseResource(){
         if(this.boss != null){
             this.boss.shutdownGracefully().syncUninterruptibly();
+            this.boss = null;
         }
     }
 
+    @Override
+    public void send(byte[] msg) throws Exception {
+        this.channel.writeAndFlush(Unpooled.buffer().writeBytes(msg)).sync();
+    }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        this.releaseResource();
+    }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Client client = new NettyClient();
         ClientConfig config = new NettyClientConfig("测试客户端", "localhost", 20000);
         client.init(config);
         client.connect();
+        client.send("你好".getBytes(StandardCharsets.UTF_8));
+        log.info("已发出信息！");
+        client.disconnect();
     }
 }

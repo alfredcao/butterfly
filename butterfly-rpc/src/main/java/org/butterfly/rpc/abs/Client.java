@@ -38,6 +38,13 @@ public interface Client {
      */
     StatusInfo status();
 
+    /**
+     * 发送消息
+     * @param msg 消息字节数组
+     * @throws Exception
+     */
+    void send(byte[] msg) throws Exception;
+
 
     @Getter@Setter
     @AllArgsConstructor
