@@ -8,6 +8,9 @@ import org.butterfly.rpc.component.AbstractServerConfig;
  * @date 2019-10-15 20:02
  */
 public class NettyServerConfig extends AbstractServerConfig {
+    public NettyServerConfig() {
+    }
+
     public NettyServerConfig(String name, int port){
         this.setName(name);
         this.setPort(port);

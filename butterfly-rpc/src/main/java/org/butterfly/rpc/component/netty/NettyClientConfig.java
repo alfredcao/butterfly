@@ -8,6 +8,9 @@ import org.butterfly.rpc.component.AbstractClientConfig;
  * @date 2019-10-21 09:33
  */
 public class NettyClientConfig extends AbstractClientConfig {
+    public NettyClientConfig() {
+    }
+
     public NettyClientConfig(String name, String serverAddress, int serverPort) {
         this.setName(name);
         this.setServerAddress(serverAddress);
