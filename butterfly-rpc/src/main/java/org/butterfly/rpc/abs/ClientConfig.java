@@ -1,11 +1,13 @@
 package org.butterfly.rpc.abs;
 
+import java.io.Serializable;
+
 /**
  * 客户端配置
  * @author caozhen
  * @date 2019-10-11 17:38
  */
-public interface ClientConfig {
+public interface ClientConfig extends Serializable {
     /**
      * 获取客户端名称
      * @return 客户端名称
