@@ -8,6 +8,7 @@ import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.butterfly.rpc.abs.Client;
 import org.butterfly.rpc.abs.ClientConfig;
 import org.butterfly.rpc.component.AbstractClient;
@@ -32,12 +33,13 @@ public class MinaClient extends AbstractClient {
     @Override
     protected void doConnect() throws Throwable {
         //创建一个过滤器对象
+        connector = new NioSocketConnector();
+        connector.setHandler(new MinaClientHandler(this.getConfig()));
         DefaultIoFilterChainBuilder filterChain = connector.getFilterChain();
 
         ProtocolCodecFilter filter = new ProtocolCodecFilter( new ByteArrayCodecFactory());
         filterChain.addLast("codec", filter);
 
-        connector.setHandler(new MinaClientHandler(this.getConfig()));
         ConnectFuture connFuture = connector.connect(
                 new InetSocketAddress(this.config.getServerAddress(), this.config.getServerPort()));
         connFuture.awaitUninterruptibly();
