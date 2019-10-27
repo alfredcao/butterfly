@@ -89,6 +89,8 @@
         <version.com.caucho.hessian>4.0.38</version.com.caucho.hessian>
         <!-- kryo -->
         <version.com.esotericsoftware.kryo>4.0.2</version.com.esotericsoftware.kryo>
+        <!-- protostuff -->
+        <version.com.dyuproject.protostuff>1.1.5</version.com.dyuproject.protostuff>
         <!-- log -->
         <version.org.slf4j.slf4j-api>1.7.25</version.org.slf4j.slf4j-api>
         <version.ch.qos.logback.logback-core>1.2.3</version.ch.qos.logback.logback-core>
@@ -275,6 +277,16 @@
                 <groupId>com.esotericsoftware</groupId>
                 <artifactId>kryo</artifactId>
                 <version>${version.com.esotericsoftware.kryo}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dyuproject.protostuff</groupId>
+                <artifactId>protostuff-core</artifactId>
+                <version>${version.com.dyuproject.protostuff}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dyuproject.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
+                <version>${version.com.dyuproject.protostuff}</version>
             </dependency>
 
             <!-- log -->

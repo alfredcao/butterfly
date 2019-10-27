@@ -2,7 +2,6 @@ package org.butterfly.rpc.component.codec.hessian;
 
 import com.caucho.hessian.io.Hessian2Input;
 import org.butterfly.rpc.abs.codec.Deserializer;
-import org.butterfly.rpc.component.netty.NettyServerConfig;
 
 import java.io.ByteArrayInputStream;
 

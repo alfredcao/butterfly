@@ -1,6 +1,8 @@
 package org.butterfly.rpc.component.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -23,6 +25,7 @@ import org.butterfly.rpc.model.constant.Constant;
 public class NettyServer extends AbstractServer {
     private EventLoopGroup boss;
     private EventLoopGroup worker;
+    private Channel channel;
 
     @Override
     protected void doStart() throws Throwable {
@@ -46,7 +49,8 @@ public class NettyServer extends AbstractServer {
                             socketChannel.pipeline().addLast(new NettyServerHandler(config));
                         }
                     });
-            serverBootstrap.bind(this.config.getPort()).sync();
+            ChannelFuture channelFuture = serverBootstrap.bind(this.config.getPort()).sync();
+            this.channel = channelFuture.channel();
             log.info("{}服务器【{}】已注册监听端口 {} 成功！", Constant.LOG_PREFIX, this.config.getName(), this.config.getPort());
         } catch (Throwable t){
             this.releaseResource();
@@ -61,6 +65,9 @@ public class NettyServer extends AbstractServer {
     }
 
     private void releaseResource(){
+        if(this.channel != null){
+            this.channel.close();
+        }
         if(this.boss != null){
             this.boss.shutdownGracefully().syncUninterruptibly();
             this.boss = null;
