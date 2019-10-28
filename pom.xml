@@ -47,6 +47,7 @@
         <version.commons-io>2.4</version.commons-io>
         <version.commons-collections>3.2.1</version.commons-collections>
         <version.commons-beanutils>1.9.3</version.commons-beanutils>
+        <version.org.apache.commons.commons-collections4>4.1</version.org.apache.commons.commons-collections4>
         <!-- servlet -->
         <version.javax.servlet.servlet-api>2.5</version.javax.servlet.servlet-api>
         <!-- poi -->
@@ -120,6 +121,11 @@
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
                 <version>${version.commons-collections}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${version.org.apache.commons.commons-collections4}</version>
             </dependency>
             <dependency>
                 <groupId>commons-beanutils</groupId>
