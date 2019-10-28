@@ -68,12 +68,17 @@ public class MinaClient extends AbstractClient {
             @Override
             public void operationComplete(WriteFuture future) {
                 if (future.isWritten()) {
+
                     //System.out.println("write操作成功");
                 } else {
 
                     log.info("write操作失败");
                 }
             }
+
+
+
+
         });
     }
 
@@ -90,10 +95,11 @@ public class MinaClient extends AbstractClient {
         }
 
         //大包测试是否半包,缓冲区设置小
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100000; i++) {
             String str = "[hello1111122222333334444455555]" + i;
             client.send(str.getBytes(StandardCharsets.UTF_8));
-            log.info("client send " + str);
+            //Thread.sleep(10);
+            //log.info("client send " + str);
         }
         countDownLatch.await();
         client.disconnect();

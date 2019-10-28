@@ -29,34 +29,30 @@ public class SimpleCumulaBytesDecoder extends CumulativeProtocolDecoder  {
     @Override
     public boolean doDecode(IoSession session, IoBuffer in,
                             ProtocolDecoderOutput out) throws Exception {
-        int packHeadLength = 4;  //包头长度(int 的长度) 根据自定义协议的包头的长度
-        if(in.remaining() > packHeadLength){  //说明缓冲区中有数据
+        int dataHeadLength = 4;
+        if(in.remaining() > dataHeadLength){  //说明缓冲区中有数据
            //标记当前position，以便后继的reset操作能恢复position位置
-            int dataLength= in.getInt();
+            byte [] sizeBytes = new byte[dataHeadLength];
             //上面的get会改变remaining()的值
             in.mark();
+            in.get(sizeBytes);//读取前4字节
+            int dataLength= BytesUtil.bytes2Int(sizeBytes);
             if(in.remaining() <dataLength) {
                 //内容不够， 重置position到操作前，进行下一轮接受新数据
                 in.reset();
                 return false;
             }else{
                 //内容足够
-                in.reset(); //重置回复position位置到操作前
                 byte[] packArray = new byte[dataLength];
-                try {
-                    in.get(packArray, 0, dataLength); //获取整条报文
-                   // String str = new String(packArray, StandardCharsets.UTF_8);
-                    out.write(packArray); //发送出去 就算完成了
-                    if(in.remaining() > 0){//如果读取一个完整包内容后还粘了包，就让父类再调用一次，进行下一次解析
-                        return true;
-                    }
-                }
-                catch (Exception e){
-                    log.info("in.get error",e);
+                in.get(packArray, 0, dataLength); //获取整条报文
+                // String str = new String(packArray, StandardCharsets.UTF_8);
+                //log.info("data len :{},mina server receive:{}",dataLength,str);
+                out.write(packArray); //发送出去 就算完成了
+                if(in.remaining() > 0){//如果读取一个完整包内容后还粘了包，就让父类再调用一次，进行下一次解析
+                    return true;
                 }
             }
         }
         return false;
     }
-
 }

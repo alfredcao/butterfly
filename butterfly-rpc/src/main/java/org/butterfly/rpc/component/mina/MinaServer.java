@@ -12,6 +12,7 @@ import org.butterfly.rpc.component.mina.encoder.ByteArrayCodecFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by Timmy on 2019/10/26.
@@ -42,7 +43,7 @@ public class MinaServer extends AbstractServer {
         filterChain.addLast("codec", filter);
         //chain.addLast("myChain",new ProtocolCodecFilter(new ObjectSerializationCodecFactory()));//表示传数据的数据是一个对象;
         //chain.addLast("myChain",new ProtocolCodecFilter(new TextLineCodecFactory()));
-        acceptor.getSessionConfig().setReadBufferSize(2048);
+        acceptor.getSessionConfig().setReadBufferSize(50);
         acceptor.setHandler(new MinaServerHandler(this.getConfig()));
         try {
             //绑定端口,并且启动服务器，立刻返回，不会堵塞
@@ -66,6 +67,7 @@ public class MinaServer extends AbstractServer {
 
     @Override
     protected  void  finalize() throws Throwable{
+        log.info("mina server will close by finalize method");
         this.releaseResource();
     }
     private void releaseResource(){
@@ -75,10 +77,12 @@ public class MinaServer extends AbstractServer {
         }
 
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         Server server = new MinaServer();
         ServerConfig config = new MinaServerConfig("测试mina服务器", 8888);
         server.init(config);
         server.start();
+        countDownLatch.await();
     }
 }

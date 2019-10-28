@@ -46,7 +46,7 @@ public class MinaServerHandler extends IoHandlerAdapter {
 
     @Override
     public void sessionCreated(IoSession session) throws Exception {
-        log.info("server session created");
+        log.info("Mina server session created");
         super.sessionCreated(session);
     }
 

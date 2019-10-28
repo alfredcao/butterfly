@@ -19,7 +19,7 @@ public class MinaClientHandler   extends IoHandlerAdapter {
 
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-        super.exceptionCaught(session, cause);
+        log.info("{}MinaClient exceptionCaught【{}】",cause.getMessage());
     }
 
     public MinaClientHandler(ClientConfig config){
@@ -40,6 +40,8 @@ public class MinaClientHandler   extends IoHandlerAdapter {
     @Override
     public void messageSent(IoSession session, Object message) throws Exception {
         super.messageSent(session, message);
+        String text = new String((byte[]) message);
+        log.info("messageSent{}MinaClient", text);
     }
 
     @Override
