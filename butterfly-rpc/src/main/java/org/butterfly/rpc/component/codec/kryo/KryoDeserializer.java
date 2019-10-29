@@ -2,7 +2,7 @@ package org.butterfly.rpc.component.codec.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
-import org.butterfly.rpc.abs.codec.Deserializer;
+import org.butterfly.rpc.component.AbstractDeserializer;
 
 import java.io.ByteArrayInputStream;
 
@@ -11,9 +11,9 @@ import java.io.ByteArrayInputStream;
  * @author caozhen
  * @date 2019-10-25 09:22
  */
-public class KryoDeserializer implements Deserializer {
+public class KryoDeserializer extends AbstractDeserializer {
     @Override
-    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws Exception {
+    protected <T> T doDeserialize(byte[] bytes, Class<T> clazz) throws Exception {
         Kryo kryo = new Kryo(); // 可优化成ThreadLocal形式
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         Input input = new Input(bais);

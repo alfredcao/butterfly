@@ -2,7 +2,7 @@ package org.butterfly.rpc.component.codec.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
-import org.butterfly.rpc.abs.codec.Serializer;
+import org.butterfly.rpc.component.AbstractSerializer;
 
 import java.io.ByteArrayOutputStream;
 
@@ -11,9 +11,9 @@ import java.io.ByteArrayOutputStream;
  * @author caozhen
  * @date 2019-10-25 09:22
  */
-public class KryoSerializer implements Serializer {
+public class KryoSerializer extends AbstractSerializer {
     @Override
-    public byte[] serialize(Object obj) throws Exception {
+    protected byte[] doSerialize(Object obj) throws Exception {
         Kryo kryo = new Kryo(); // 可优化成ThreadLocal形式
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Output output = new Output(baos);

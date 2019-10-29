@@ -1,7 +1,7 @@
 package org.butterfly.rpc.component.codec.hessian;
 
 import com.caucho.hessian.io.Hessian2Output;
-import org.butterfly.rpc.abs.codec.Serializer;
+import org.butterfly.rpc.component.AbstractSerializer;
 
 import java.io.ByteArrayOutputStream;
 
@@ -10,9 +10,9 @@ import java.io.ByteArrayOutputStream;
  * @author alfredcao
  * @date 2019-10-24 23:21
  */
-public class HessianSerializer implements Serializer {
+public class HessianSerializer extends AbstractSerializer {
     @Override
-    public byte[] serialize(Object obj) throws Exception {
+    protected byte[] doSerialize(Object obj) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Hessian2Output output = new Hessian2Output(baos);
         output.writeObject(obj);

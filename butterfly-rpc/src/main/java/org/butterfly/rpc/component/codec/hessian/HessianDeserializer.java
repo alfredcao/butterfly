@@ -1,7 +1,7 @@
 package org.butterfly.rpc.component.codec.hessian;
 
 import com.caucho.hessian.io.Hessian2Input;
-import org.butterfly.rpc.abs.codec.Deserializer;
+import org.butterfly.rpc.component.AbstractDeserializer;
 
 import java.io.ByteArrayInputStream;
 
@@ -10,9 +10,9 @@ import java.io.ByteArrayInputStream;
  * @author alfredcao
  * @date 2019-10-24 23:23
  */
-public class HessianDeserializer implements Deserializer {
+public class HessianDeserializer extends AbstractDeserializer {
     @Override
-    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws Exception {
+    protected <T> T doDeserialize(byte[] bytes, Class<T> clazz) throws Exception {
         Hessian2Input input = new Hessian2Input(new ByteArrayInputStream(bytes));
         return (T) input.readObject(clazz);
     }
