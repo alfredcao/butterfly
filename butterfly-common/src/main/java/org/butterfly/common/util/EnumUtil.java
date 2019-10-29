@@ -1,5 +1,6 @@
 package org.butterfly.common.util;
 
+import org.butterfly.common.core.enumeration.CodeByteEnum;
 import org.butterfly.common.core.enumeration.CodeEnum;
 import org.butterfly.common.core.enumeration.NameEnum;
 
@@ -20,6 +21,22 @@ public class EnumUtil {
     }
 
     public static <T extends CodeEnum> T getEnumConstantByCode(Class<T> enumClass, int code) {
+        return getEnumConstantByCode(enumClass, code, null);
+    }
+
+    /**
+     * 根据code获取枚举常量
+     */
+    public static <T extends CodeByteEnum> T getEnumConstantByCodeByte(Class<T> enumClass, byte code, T defaultEnumConstant) {
+        for (T enumConstant : enumClass.getEnumConstants()) {
+            if(enumConstant.getCode() == code){
+                return enumConstant;
+            }
+        }
+        return defaultEnumConstant;
+    }
+
+    public static <T extends CodeEnum> T getEnumConstantByCodeByte(Class<T> enumClass, byte code) {
         return getEnumConstantByCode(enumClass, code, null);
     }
 
