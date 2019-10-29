@@ -12,6 +12,11 @@ import org.butterfly.rpc.model.dto.RpcMsg;
 import java.nio.ByteOrder;
 import java.util.Map;
 
+/**
+ * netty rpc消息解码器
+ * @author alfredcao
+ * @date 2019-10-29 15:31
+ */
 public class NettyRpcMsgDecoder extends LengthFieldBasedFrameDecoder {
     private Deserializer deserializer;
     public NettyRpcMsgDecoder(int maxFrameLength) {
