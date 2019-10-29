@@ -58,4 +58,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
         ctx.flush();
         ctx.fireChannelReadComplete();
     }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        Channel channel = ctx.channel();
+        SocketAddress address = channel.remoteAddress();
+        ChannelId channelId = channel.id();
+        log.error("{}通道异常即将关闭(服务器【{}】)！通道信息 -> 通道ID：{}，远程地址 -> {}", Constant.LOG_PREFIX, this.config.getName(), channelId.asLongText(), address.toString(), cause);
+        ctx.close();
+    }
 }
