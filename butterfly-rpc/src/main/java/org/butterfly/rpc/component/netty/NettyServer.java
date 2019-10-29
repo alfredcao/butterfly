@@ -13,7 +13,11 @@ import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.butterfly.rpc.abs.Server;
 import org.butterfly.rpc.abs.ServerConfig;
+import org.butterfly.rpc.abs.codec.Deserializer;
+import org.butterfly.rpc.abs.codec.Serializer;
 import org.butterfly.rpc.component.AbstractServer;
+import org.butterfly.rpc.component.codec.hessian.HessianDeserializer;
+import org.butterfly.rpc.component.codec.hessian.HessianSerializer;
 import org.butterfly.rpc.model.constant.Constant;
 
 /**
@@ -27,16 +31,26 @@ public class NettyServer extends AbstractServer {
     private EventLoopGroup worker;
     private Channel channel;
 
+    public NettyServer() {
+        super();
+    }
+
+    public NettyServer(Serializer serializer, Deserializer deserializer) {
+        super(serializer, deserializer);
+    }
+
     @Override
     protected void doStart() throws Throwable {
         final ServerConfig config = this.config;
 
         this.boss = new NioEventLoopGroup();
         this.worker = new NioEventLoopGroup();
-        ServerBootstrap serverBootstrap = new ServerBootstrap();
-
         try {
             // 配置服务器
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            final Serializer serializer = this.getSerializer();
+            final Deserializer deserializer = this.getDeserializer();
+            final int maxRecBytes = this.maxRecBytes();
             serverBootstrap.group(this.boss, this.worker)
                     .channel(NioServerSocketChannel.class)
                     .childOption(ChannelOption.SO_BACKLOG, 1024)
@@ -46,6 +60,8 @@ public class NettyServer extends AbstractServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
+                            socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
                             socketChannel.pipeline().addLast(new NettyServerHandler(config));
                         }
                     });
@@ -85,7 +101,7 @@ public class NettyServer extends AbstractServer {
     }
 
     public static void main(String[] args) {
-        Server server = new NettyServer();
+        Server server = new NettyServer(new HessianSerializer(), new HessianDeserializer());
         ServerConfig config = new NettyServerConfig("测试服务器", 20000);
         server.init(config);
         server.start();

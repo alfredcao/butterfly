@@ -2,8 +2,11 @@ package org.butterfly.rpc.component;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.butterfly.common.util.CheckUtil;
 import org.butterfly.rpc.abs.Client;
 import org.butterfly.rpc.abs.ClientConfig;
+import org.butterfly.rpc.abs.codec.Deserializer;
+import org.butterfly.rpc.abs.codec.Serializer;
 
 /**
  * 客户端实现基类
@@ -13,6 +16,19 @@ import org.butterfly.rpc.abs.ClientConfig;
 @Slf4j
 public abstract class AbstractClient implements Client {
     private final StatusInfo statusInfo = new StatusInfo(Status.NEW, null);
+    @Getter
+    private Serializer serializer;
+    @Getter
+    private Deserializer deserializer;
+
+    public AbstractClient() {
+    }
+
+    public AbstractClient(Serializer serializer, Deserializer deserializer) {
+        this.serializer = serializer;
+        this.deserializer = deserializer;
+    }
+
     @Getter
     protected ClientConfig config;
 

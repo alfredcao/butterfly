@@ -12,7 +12,7 @@ import org.butterfly.common.util.EnumUtil;
  * @author caozhen
  * @date 2019-10-11 16:14
  */
-public interface Server {
+public interface Server extends EndPoint {
     /**
      * 初始化服务器
      * @param config 服务器配置

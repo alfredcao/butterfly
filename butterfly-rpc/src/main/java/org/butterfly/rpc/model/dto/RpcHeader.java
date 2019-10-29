@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
+import org.butterfly.rpc.model.constant.Constant;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -22,12 +23,12 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class RpcHeader implements Serializable {
-    private int magic = 0xbf201910;
+    private int magic = Constant.MAGIC_RPC;
     private int length; // 消息总字节数 = 消息头字节数 + 消息体字节数
     private byte type; // 消息类型
+    private String serviceId; // 服务ID
     private String sessionId; // 会话ID
     private String requestId; // 请求ID
-    private int serviceId; // 服务ID
     private Map<String, Object> extendAttributes; // 扩展属性
 
     @Override

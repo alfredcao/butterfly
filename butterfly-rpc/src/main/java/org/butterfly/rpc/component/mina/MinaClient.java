@@ -13,6 +13,7 @@ import org.butterfly.rpc.abs.Client;
 import org.butterfly.rpc.abs.ClientConfig;
 import org.butterfly.rpc.component.AbstractClient;
 import org.butterfly.rpc.component.mina.encoder.ByteArrayCodecFactory;
+import org.butterfly.rpc.model.dto.RpcMsg;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -80,6 +81,11 @@ public class MinaClient extends AbstractClient {
 
 
         });
+    }
+
+    @Override
+    public void send(RpcMsg rpcMsg) throws Exception {
+
     }
 
     public static void main(String[] args) throws Exception {

@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.butterfly.rpc.abs.Server;
 import org.butterfly.rpc.abs.ServerConfig;
+import org.butterfly.rpc.abs.codec.Deserializer;
+import org.butterfly.rpc.abs.codec.Serializer;
 
 /**
  * 服务器实现基类
@@ -15,6 +17,19 @@ public abstract class AbstractServer implements Server {
     private final StatusInfo statusInfo = new StatusInfo(Status.NEW, null);
     @Getter
     protected ServerConfig config;
+    @Getter
+    private Serializer serializer;
+    @Getter
+    private Deserializer deserializer;
+
+    public AbstractServer() {
+    }
+
+    public AbstractServer(Serializer serializer, Deserializer deserializer) {
+        this.serializer = serializer;
+        this.deserializer = deserializer;
+    }
+
 
     @Override
     public final boolean init(ServerConfig config) {

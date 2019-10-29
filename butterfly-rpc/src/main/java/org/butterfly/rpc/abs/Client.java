@@ -6,13 +6,14 @@ import lombok.Setter;
 import org.butterfly.common.core.enumeration.CodeEnum;
 import org.butterfly.common.core.enumeration.NameEnum;
 import org.butterfly.common.util.EnumUtil;
+import org.butterfly.rpc.model.dto.RpcMsg;
 
 /**
  * 客户端
  * @author caozhen
  * @date 2019-10-11 16:14
  */
-public interface Client {
+public interface Client extends EndPoint {
     /**
      * 初始化客户端
      * @param config 客户端配置
@@ -44,6 +45,13 @@ public interface Client {
      * @throws Exception
      */
     void send(byte[] msg) throws Exception;
+
+    /**
+     * 发送RPC消息
+     * @param rpcMsg rpc消息
+     * @throws Exception
+     */
+    void send(RpcMsg rpcMsg) throws Exception;
 
 
     @Getter@Setter
