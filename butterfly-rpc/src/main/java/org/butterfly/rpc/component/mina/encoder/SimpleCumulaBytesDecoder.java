@@ -6,6 +6,10 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.proxy.utils.ByteUtilities;
+import org.butterfly.common.util.CheckUtil;
+import org.butterfly.rpc.abs.codec.Deserializer;
+import org.butterfly.rpc.abs.codec.Serializer;
+import org.butterfly.rpc.model.dto.RpcMsg;
 
 import java.nio.charset.StandardCharsets;
 
@@ -15,6 +19,17 @@ import java.nio.charset.StandardCharsets;
  */
 @Slf4j
 public class SimpleCumulaBytesDecoder extends CumulativeProtocolDecoder  {
+    private Deserializer deserializer;
+
+    public SimpleCumulaBytesDecoder(Deserializer deserializer){
+        if(deserializer == null){
+            // TODO 提供默认序列化器
+        }
+        CheckUtil.checkNotNull(deserializer, "序列化器");
+        this.deserializer = deserializer;
+    }
+
+
     /**
      * 这个方法的返回值是重点：
      * 1、当内容刚好时，返回 false，告知父类接收下一批内容
@@ -45,14 +60,15 @@ public class SimpleCumulaBytesDecoder extends CumulativeProtocolDecoder  {
                 //内容足够
                 byte[] packArray = new byte[dataLength];
                 in.get(packArray, 0, dataLength); //获取整条报文
-                // String str = new String(packArray, StandardCharsets.UTF_8);
-                //log.info("data len :{},mina server receive:{}",dataLength,str);
-                out.write(packArray); //发送出去 就算完成了
+                RpcMsg msg = deserializer.deserialize(packArray,RpcMsg.class);
+                out.write(msg);
+                //out.write(packArray); //发送出去 就算完成了
                 if(in.remaining() > 0){//如果读取一个完整包内容后还粘了包，就让父类再调用一次，进行下一次解析
                     return true;
                 }
             }
         }
+        in.position(1);
         return false;
     }
 }

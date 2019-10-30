@@ -11,12 +11,19 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.butterfly.rpc.abs.Client;
 import org.butterfly.rpc.abs.ClientConfig;
+import org.butterfly.rpc.abs.codec.Deserializer;
+import org.butterfly.rpc.abs.codec.Serializer;
 import org.butterfly.rpc.component.AbstractClient;
+import org.butterfly.rpc.component.codec.hessian.HessianDeserializer;
+import org.butterfly.rpc.component.codec.hessian.HessianSerializer;
 import org.butterfly.rpc.component.mina.encoder.ByteArrayCodecFactory;
+import org.butterfly.rpc.model.dto.RpcHeader;
 import org.butterfly.rpc.model.dto.RpcMsg;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -25,7 +32,13 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class MinaClient extends AbstractClient {
     private IoConnector connector;
+    private ProtocolCodecFilter filter;
     private static IoSession session;
+
+    public MinaClient(Serializer serializer, Deserializer deserializer) {
+        super(serializer, deserializer);
+        filter = new ProtocolCodecFilter( new ByteArrayCodecFactory(serializer,deserializer));
+    }
     @Override
     protected void doInit() throws Throwable {
 
@@ -38,7 +51,7 @@ public class MinaClient extends AbstractClient {
         connector.setHandler(new MinaClientHandler(this.getConfig()));
         DefaultIoFilterChainBuilder filterChain = connector.getFilterChain();
 
-        ProtocolCodecFilter filter = new ProtocolCodecFilter( new ByteArrayCodecFactory());
+        //ProtocolCodecFilter filter = new ProtocolCodecFilter( new ByteArrayCodecFactory());
         filterChain.addLast("codec", filter);
 
         ConnectFuture connFuture = connector.connect(
@@ -76,36 +89,55 @@ public class MinaClient extends AbstractClient {
                     log.info("write操作失败");
                 }
             }
-
-
-
-
         });
     }
 
     @Override
     public void send(RpcMsg rpcMsg) throws Exception {
+        WriteFuture future = session.write(rpcMsg);
+        future.addListener(new IoFutureListener<WriteFuture>() {
+            // write操作完成后调用的回调函数
+            @Override
+            public void operationComplete(WriteFuture future) {
+                if (future.isWritten()) {
+                } else {
 
+                    log.info("write操作失败");
+                }
+            }
+        });
+    }
+
+
+    private static RpcMsg getTestMsg(String str){
+        RpcMsg rpcMsg = new RpcMsg();
+        RpcHeader rpcHeader = new RpcHeader();
+        rpcHeader.setType((byte)3);
+        rpcHeader.setServiceId("serviceId");
+        rpcHeader.setSessionId("sessionId");
+        rpcHeader.setRequestId("requestId");
+        Map<String, Object> extendAttributes = new HashMap<>();
+        extendAttributes.put("key1", "value_" + str);
+        rpcHeader.setExtendAttributes(extendAttributes);
+        rpcMsg.setHeader(rpcHeader);
+        rpcMsg.setBody("body"+str);
+        return rpcMsg;
     }
 
     public static void main(String[] args) throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        Client client = new MinaClient();
+        Client client = new MinaClient(new HessianSerializer(), new HessianDeserializer());
         ClientConfig config = new MinaClientConfig("mina测试客户端", "127.0.0.1", 8888);
         client.init(config);
         client.connect();
         //小包测试是否粘包
         for (int i = 0; i < 1000; i++) {
             String str = "hello" + i;
-            //client.send(str.getBytes(StandardCharsets.UTF_8));
         }
-
         //大包测试是否半包,缓冲区设置小
         for (int i = 0; i < 100000; i++) {
-            String str = "[hello1111122222333334444455555]" + i;
-            client.send(str.getBytes(StandardCharsets.UTF_8));
-            //Thread.sleep(10);
-            //log.info("client send " + str);
+            String str = "[中文编码hello1111122222333334444455555]" + i;
+            client.send(getTestMsg(str));
         }
         countDownLatch.await();
         client.disconnect();

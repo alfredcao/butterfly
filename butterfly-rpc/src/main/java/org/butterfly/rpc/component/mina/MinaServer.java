@@ -7,7 +7,11 @@ import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.butterfly.rpc.abs.Server;
 import org.butterfly.rpc.abs.ServerConfig;
+import org.butterfly.rpc.abs.codec.Deserializer;
+import org.butterfly.rpc.abs.codec.Serializer;
 import org.butterfly.rpc.component.AbstractServer;
+import org.butterfly.rpc.component.codec.hessian.HessianDeserializer;
+import org.butterfly.rpc.component.codec.hessian.HessianSerializer;
 import org.butterfly.rpc.component.mina.encoder.ByteArrayCodecFactory;
 
 import java.io.IOException;
@@ -20,6 +24,13 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class MinaServer extends AbstractServer {
     SocketAcceptor acceptor;
+    ByteArrayCodecFactory byteArrayCodecFactory;
+
+    public MinaServer(Serializer serializer, Deserializer deserializer){
+        super(serializer,deserializer);
+        byteArrayCodecFactory = new ByteArrayCodecFactory(serializer,deserializer);
+
+    }
     @Override
     public ServerConfig getConfig() {
         return super.getConfig();
@@ -39,7 +50,7 @@ public class MinaServer extends AbstractServer {
        DefaultIoFilterChainBuilder filterChain = acceptor.getFilterChain();
         //设定一个过滤器，一行一行的读取数据(/r/n)
 
-        ProtocolCodecFilter filter = new ProtocolCodecFilter( new ByteArrayCodecFactory());
+        ProtocolCodecFilter filter = new ProtocolCodecFilter(byteArrayCodecFactory);
         filterChain.addLast("codec", filter);
         //chain.addLast("myChain",new ProtocolCodecFilter(new ObjectSerializationCodecFactory()));//表示传数据的数据是一个对象;
         //chain.addLast("myChain",new ProtocolCodecFilter(new TextLineCodecFactory()));
@@ -79,7 +90,7 @@ public class MinaServer extends AbstractServer {
     }
     public static void main(String[] args) throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        Server server = new MinaServer();
+        Server server = new MinaServer(new HessianSerializer(), new HessianDeserializer());
         ServerConfig config = new MinaServerConfig("测试mina服务器", 8888);
         server.init(config);
         server.start();

@@ -7,6 +7,7 @@ import org.butterfly.common.util.CheckUtil;
 import org.butterfly.rpc.abs.ClientConfig;
 import org.butterfly.rpc.abs.ServerConfig;
 import org.butterfly.rpc.model.constant.Constant;
+import org.butterfly.rpc.model.dto.RpcMsg;
 
 import java.net.SocketAddress;
 
@@ -39,9 +40,7 @@ public class MinaClientHandler   extends IoHandlerAdapter {
 
     @Override
     public void messageSent(IoSession session, Object message) throws Exception {
-        super.messageSent(session, message);
-        String text = new String((byte[]) message);
-        log.info("messageSent{}MinaClient", text);
+        log.info("messageSent{}MinaClient", ((RpcMsg) message).toString());
     }
 
     @Override

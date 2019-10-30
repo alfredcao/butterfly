@@ -7,6 +7,8 @@ import org.apache.mina.core.session.IoSession;
 import org.butterfly.common.util.CheckUtil;
 import org.butterfly.rpc.abs.ServerConfig;
 import org.butterfly.rpc.model.constant.Constant;
+import org.butterfly.rpc.model.dto.RpcMsg;
+import org.butterfly.rpc.model.enumeration.RpcMsgType;
 
 import java.net.SocketAddress;
 
@@ -35,6 +37,7 @@ public class MinaServerHandler extends IoHandlerAdapter {
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
         //业务代码在这里编写处理
+        /*
         byte[] b = (byte[])message;
         StringBuffer stringBuffer = new StringBuffer();
         for(int i = 0; i < b.length; i++){
@@ -42,6 +45,9 @@ public class MinaServerHandler extends IoHandlerAdapter {
         }
         session.write(message);
         log.info("mina server receive:{}",stringBuffer.toString());
+        */
+        RpcMsg msg = (RpcMsg)message;
+        log.info("mina server receive:{}",msg.toString());
     }
 
     @Override
