@@ -25,4 +25,12 @@ public interface ClientConfig extends Serializable {
      * @return 服务端端口
      */
     int getServerPort();
+
+    /**
+     * 获取客户端连接的超时时间(秒)
+     * @return 客户端连接的超时时间(秒)
+     */
+    default int timeoutSeconds(){
+        return 60;
+    }
 }

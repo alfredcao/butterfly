@@ -52,7 +52,7 @@ public class RpcMsg implements Serializable {
      * 获取握手响应RPC消息
      * @return
      */
-    public static RpcMsg handshakeRespRpcMsg(String sessionId, String requestId){
+    public static RpcMsg handshakeRespRpcMsg(String sessionId, String requestId, int statusCode){
         CheckUtil.checkNotNull(sessionId, "会话ID");
         CheckUtil.checkNotNull(requestId, "请求ID");
         RpcHeader rpcHeader = RpcHeader.builder()
@@ -61,6 +61,7 @@ public class RpcMsg implements Serializable {
                 .sessionId(sessionId)
                 .requestId(requestId)
                 .build();
+        rpcHeader.setStatusCode(statusCode);
         return RpcMsg.builder()
                 .header(rpcHeader)
                 .build();

@@ -10,6 +10,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.butterfly.rpc.abs.Server;
 import org.butterfly.rpc.abs.ServerConfig;
@@ -60,8 +61,11 @@ public class NettyServer extends AbstractServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
                             socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
                             socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
+                            socketChannel.pipeline().addLast(new NettyHandShakeRespHandler(config));
+                            socketChannel.pipeline().addLast(new NettyHeartBeatRespHandler(config));
                             socketChannel.pipeline().addLast(new NettyServerHandler(config));
                         }
                     });

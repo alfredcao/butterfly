@@ -10,6 +10,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.butterfly.rpc.model.constant.Constant;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,5 +45,20 @@ public class RpcHeader implements Serializable {
                 ", requestId : " + this.requestId +
                 ", serviceId : " + this.serviceId +
                 ", extendAttributes : " + extendAttributesDesc + "]";
+    }
+
+    public int getStatusCode(){
+        Object statusCode = null;
+        if(this.extendAttributes == null || (statusCode = this.extendAttributes.get("statusCode")) == null){
+            return -1;
+        }
+        return (int)statusCode;
+    }
+
+    public void setStatusCode(int statusCode){
+        if(this.extendAttributes == null){
+            this.extendAttributes = new HashMap<>();
+        }
+        this.extendAttributes.put("statusCode", statusCode);
     }
 }

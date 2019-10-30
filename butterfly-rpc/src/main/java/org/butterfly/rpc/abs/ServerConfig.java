@@ -19,4 +19,12 @@ public interface ServerConfig extends Serializable {
      * @return 端口号
      */
     int getPort();
+
+    /**
+     * 获取服务器单个连接的超时时间(秒)
+     * @return 服务器单个连接的超时时间(秒)
+     */
+    default int timeoutSeconds(){
+        return 60;
+    }
 }
