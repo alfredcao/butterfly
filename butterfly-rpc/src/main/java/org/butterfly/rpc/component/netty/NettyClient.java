@@ -7,6 +7,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.butterfly.rpc.abs.Client;
 import org.butterfly.rpc.abs.ClientConfig;
@@ -59,6 +60,7 @@ public class NettyClient extends AbstractClient {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
+                            socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
                             socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
                         }
                     });
