@@ -61,9 +61,11 @@ public class NettyServer extends AbstractServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
                             socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
                             socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
-                            socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
+                            socketChannel.pipeline().addLast(new NettyHandShakeRespHandler(config));
+                            socketChannel.pipeline().addLast(new NettyHeartBeatRespHandler(config));
                             socketChannel.pipeline().addLast(new NettyServerHandler(config));
                         }
                     });

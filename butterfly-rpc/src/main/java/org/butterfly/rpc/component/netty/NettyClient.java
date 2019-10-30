@@ -59,9 +59,11 @@ public class NettyClient extends AbstractClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
                             socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
+                            socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
                             socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
+                            socketChannel.pipeline().addLast(new NettyHandShakeReqHandler(config));
+                            socketChannel.pipeline().addLast(new NettyHeartBeatReqHandler(config));
                         }
                     });
             ChannelFuture channelFuture = bootstrap.connect(this.config.getServerAddress(), this.config.getServerPort()).sync();
@@ -106,21 +108,21 @@ public class NettyClient extends AbstractClient {
         ClientConfig config = new NettyClientConfig("测试客户端", "localhost", 20000);
         client.init(config);
         client.connect();
-        // 组装RPC消息
-        RpcMsg rpcMsg = new RpcMsg();
-        RpcHeader rpcHeader = new RpcHeader();
-        rpcHeader.setType((byte)3);
-        rpcHeader.setServiceId("serviceId");
-        rpcHeader.setSessionId("sessionId");
-        rpcHeader.setRequestId("requestId");
-        Map<String, Object> extendAttributes = new HashMap<>();
-        extendAttributes.put("key1", "value1");
-        rpcHeader.setExtendAttributes(extendAttributes);
-        rpcMsg.setHeader(rpcHeader);
-        rpcMsg.setBody(config);
-
-        client.send(rpcMsg);
-        log.info("已发出信息！");
-        client.disconnect();
+//        // 组装RPC消息
+//        RpcMsg rpcMsg = new RpcMsg();
+//        RpcHeader rpcHeader = new RpcHeader();
+//        rpcHeader.setType((byte)3);
+//        rpcHeader.setServiceId("serviceId");
+//        rpcHeader.setSessionId("sessionId");
+//        rpcHeader.setRequestId("requestId");
+//        Map<String, Object> extendAttributes = new HashMap<>();
+//        extendAttributes.put("key1", "value1");
+//        rpcHeader.setExtendAttributes(extendAttributes);
+//        rpcMsg.setHeader(rpcHeader);
+//        rpcMsg.setBody(config);
+//
+//        client.send(rpcMsg);
+//        log.info("已发出信息！");
+//        client.disconnect();
     }
 }
