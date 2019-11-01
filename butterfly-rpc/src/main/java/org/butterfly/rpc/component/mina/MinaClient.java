@@ -2,12 +2,15 @@ package org.butterfly.rpc.component.mina;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
+import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.keepalive.KeepAliveFilter;
+import org.apache.mina.filter.keepalive.KeepAliveMessageFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.butterfly.rpc.abs.Client;
 import org.butterfly.rpc.abs.ClientConfig;
@@ -19,9 +22,8 @@ import org.butterfly.rpc.component.codec.hessian.HessianSerializer;
 import org.butterfly.rpc.component.mina.encoder.ByteArrayCodecFactory;
 import org.butterfly.rpc.model.dto.RpcHeader;
 import org.butterfly.rpc.model.dto.RpcMsg;
-
+import org.butterfly.rpc.model.enumeration.RpcMsgType;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -53,7 +55,34 @@ public class MinaClient extends AbstractClient {
 
         //ProtocolCodecFilter filter = new ProtocolCodecFilter( new ByteArrayCodecFactory());
         filterChain.addLast("codec", filter);
+        KeepAliveMessageFactory heartBeatFactory = new KeepAliveMessageFactoryClientImpl();
+        KeepAliveFilter heartBeat = new KeepAliveFilter(heartBeatFactory);
+        filterChain.addLast("heartbeat", heartBeat);
 
+        connector.getFilterChain().addFirst("reconnection", new IoFilterAdapter() {
+            @Override
+            public void sessionClosed(NextFilter nextFilter, IoSession ioSession) throws Exception {
+                for (; ; ) {
+                    try {
+                        Thread.sleep(3000);
+                        ConnectFuture future = connector.connect();
+                        future.awaitUninterruptibly();// 等待连接创建成功
+                        session = future.getSession();
+                        // 获取会话
+                        if (session.isConnected()) {
+                            log.info("断线重连["+ connector.getDefaultRemoteAddress() +":"+
+                             connector.getDefaultRemoteAddress()+"]成功");
+                            break;
+                        }
+                    } catch (Exception ex) {
+                        log.info("重连服务器登录失败,3秒再连接一次:" + ex.getMessage());
+                    }
+                }
+            }
+        });
+
+        connector.setDefaultRemoteAddress(
+                new InetSocketAddress(this.config.getServerAddress(), this.config.getServerPort()));// 设置默认访问地址
         ConnectFuture connFuture = connector.connect(
                 new InetSocketAddress(this.config.getServerAddress(), this.config.getServerPort()));
         connFuture.awaitUninterruptibly();
@@ -107,6 +136,36 @@ public class MinaClient extends AbstractClient {
             }
         });
     }
+    private class KeepAliveMessageFactoryClientImpl implements KeepAliveMessageFactory {
+        @Override
+        public boolean isRequest(IoSession session, Object message) {
+            RpcMsg msg = (RpcMsg) message;
+            if (msg.getHeader().getType() == RpcMsgType.HEARTBEAT_REQ.getCode())
+                return true;
+            return false;
+        }
+
+        @Override
+        public boolean isResponse(IoSession session, Object message) {
+            return false;
+        }
+
+        @Override
+        public Object getRequest(IoSession session) {
+            //log.info("发送心跳给客户端: " );
+            /** 返回预设语句 */
+           // return RpcMsg.heartBeatReqRpcMsg(String.valueOf(session.getId()), "111");
+            return null;
+        }
+
+        @Override
+        public Object getResponse(IoSession session, Object request) {
+            //服务端为了性能不发回复包
+            /** 返回预设语句 */
+            return RpcMsg.heartBeatReqRpcMsg(String.valueOf(session.getId()), "111");
+        }
+
+    }
 
 
     private static RpcMsg getTestMsg(String str){
@@ -135,9 +194,10 @@ public class MinaClient extends AbstractClient {
             String str = "hello" + i;
         }
         //大包测试是否半包,缓冲区设置小
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 10000; i++) {
             String str = "[中文编码hello1111122222333334444455555]" + i;
             client.send(getTestMsg(str));
+            Thread.sleep(1000);
         }
         countDownLatch.await();
         client.disconnect();

@@ -68,7 +68,6 @@ public class SimpleCumulaBytesDecoder extends CumulativeProtocolDecoder  {
                 }
             }
         }
-        in.position(1);
         return false;
     }
 }
