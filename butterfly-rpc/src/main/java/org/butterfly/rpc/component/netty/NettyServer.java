@@ -91,6 +91,10 @@ public class NettyServer extends AbstractServer {
     private void releaseResource(){
         if(this.channel != null){
             this.channel.close();
+            this.channel = null;
+        }
+        if(this.serverBootstrap != null){
+            this.serverBootstrap = null;
         }
         if(this.boss != null){
             this.boss.shutdownGracefully().syncUninterruptibly();
