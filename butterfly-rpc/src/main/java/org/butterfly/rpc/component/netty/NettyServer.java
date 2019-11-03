@@ -74,7 +74,7 @@ public class NettyServer extends AbstractServer {
     @Override
     protected void doStart() throws Throwable {
         try {
-            ChannelFuture channelFuture = serverBootstrap.bind(this.config.getPort()).sync();
+            ChannelFuture channelFuture = this.serverBootstrap.bind(this.config.getPort()).sync();
             this.channel = channelFuture.channel();
             log.info("{}服务器【{}】已注册监听端口 {} 成功！", Constant.LOG_PREFIX, this.config.getName(), this.config.getPort());
         } catch (Throwable t){
