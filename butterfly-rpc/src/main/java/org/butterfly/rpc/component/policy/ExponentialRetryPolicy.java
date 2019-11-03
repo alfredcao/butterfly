@@ -1,6 +1,7 @@
 package org.butterfly.rpc.component.policy;
 
 import lombok.extern.slf4j.Slf4j;
+import org.butterfly.common.util.CheckUtil;
 
 /**
  * 指数级休眠重试策略
@@ -24,6 +25,7 @@ public class ExponentialRetryPolicy extends SleepRetryPolicy {
 
     public ExponentialRetryPolicy(long baseSleepTimeMs){
         super();
+        this.checkBaseSleepTimeMs(baseSleepTimeMs);
         this.currentSleepTimeMs = this.baseSleepTimeMs = baseSleepTimeMs;
         this.maxSleepTimeMs = DEFAULT_MAX_SLEEP_TIME_MS;
         this.multiplier = DEFAULT_MULTIPLIER;
@@ -39,9 +41,24 @@ public class ExponentialRetryPolicy extends SleepRetryPolicy {
 
     public ExponentialRetryPolicy(long baseSleepTimeMs, int maxRetryCount, long maxSleepTimeMs, double multiplier){
         super(maxRetryCount);
+        this.checkBaseSleepTimeMs(baseSleepTimeMs);
+        this.checkMaxSleepTimeMs(maxSleepTimeMs);
+        this.checkMultiplier(multiplier);
         this.currentSleepTimeMs = this.baseSleepTimeMs = baseSleepTimeMs;
         this.maxSleepTimeMs = maxSleepTimeMs;
         this.multiplier = multiplier;
+    }
+
+    private void checkBaseSleepTimeMs(long baseSleepTimeMs){
+        CheckUtil.checkPositive(baseSleepTimeMs, "baseSleepTimeMs必须为正数！");
+    }
+
+    private void checkMaxSleepTimeMs(long maxSleepTimeMs){
+        CheckUtil.checkPositive(maxSleepTimeMs, "maxSleepTimeMs必须为正数！");
+    }
+
+    private void checkMultiplier(double multiplier){
+        CheckUtil.checkBig(multiplier, 1, "multiplier必须大于1！");
     }
 
     @Override
