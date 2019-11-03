@@ -24,7 +24,7 @@ public class NettyHeartBeatRespHandler extends SimpleChannelInboundHandler<RpcMs
     protected void channelRead0(ChannelHandlerContext ctx, RpcMsg rpcMsg) throws Exception {
         if(rpcMsg.getHeader().getType() == RpcMsgType.HEARTBEAT_REQ.getCode()){
             // 心跳请求
-            log.info("{}服务器【{}】接收到心跳请求！通道ID -> {}，远程地址 -> {}，RPC消息 -> {}", Constant.LOG_PREFIX, this.config.getName(), ctx.channel().id().asLongText(), ctx.channel().remoteAddress(), rpcMsg.toString());
+            log.debug("{}服务器【{}】接收到心跳请求！通道ID -> {}，远程地址 -> {}，RPC消息 -> {}", Constant.LOG_PREFIX, this.config.getName(), ctx.channel().id().asLongText(), ctx.channel().remoteAddress(), rpcMsg.toString());
             RpcMsg heartBeatRespRpcMsg = RpcMsg.heartBeatRespRpcMsg(ctx.channel().id().asLongText(), rpcMsg.getHeader().getRequestId());
             ctx.writeAndFlush(heartBeatRespRpcMsg);
         } else {

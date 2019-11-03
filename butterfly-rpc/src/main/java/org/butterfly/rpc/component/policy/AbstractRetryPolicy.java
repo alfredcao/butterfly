@@ -1,5 +1,6 @@
 package org.butterfly.rpc.component.policy;
 
+import lombok.extern.slf4j.Slf4j;
 import org.butterfly.rpc.abs.policy.RetryPolicy;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author alfredcao
  * @date 2019-11-02 20:02
  */
+@Slf4j
 public abstract class AbstractRetryPolicy implements RetryPolicy {
     private int maxRetryCount;
     protected AtomicInteger retryCount = new AtomicInteger(0);
@@ -34,6 +36,11 @@ public abstract class AbstractRetryPolicy implements RetryPolicy {
      */
     protected boolean proc(){
         return true;
+    }
+
+    @Override
+    public int getRetryCount() {
+        return this.retryCount.get();
     }
 
     @Override

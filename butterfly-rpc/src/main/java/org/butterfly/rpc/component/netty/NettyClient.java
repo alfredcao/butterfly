@@ -1,9 +1,13 @@
 package org.butterfly.rpc.component.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -17,12 +21,7 @@ import org.butterfly.rpc.component.AbstractClient;
 import org.butterfly.rpc.component.codec.hessian.HessianDeserializer;
 import org.butterfly.rpc.component.codec.hessian.HessianSerializer;
 import org.butterfly.rpc.model.constant.Constant;
-import org.butterfly.rpc.model.dto.RpcHeader;
 import org.butterfly.rpc.model.dto.RpcMsg;
-
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * netty客户端
@@ -32,6 +31,7 @@ import java.util.Map;
 @Slf4j
 public class NettyClient extends AbstractClient {
     private EventLoopGroup boss; // 主线程池
+    private Bootstrap bootstrap; // 客户端启动器
     private Channel channel; // 通道
 
     public NettyClient() {
@@ -45,34 +45,31 @@ public class NettyClient extends AbstractClient {
     @Override
     protected void doInit() throws Throwable {
         this.boss = new NioEventLoopGroup();
+        this.bootstrap = new Bootstrap();
+        final Serializer serializer = this.getSerializer();
+        final Deserializer deserializer = this.getDeserializer();
+        final int maxRecBytes = this.maxRecBytes();
+        final NettyClient client = this;
+        this.bootstrap.group(this.boss).channel(NioSocketChannel.class)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
+                        socketChannel.pipeline().addLast(new NettyReconnectHandler(client));
+                        socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
+                        socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
+                        socketChannel.pipeline().addLast(new NettyHandShakeReqHandler(config));
+                        socketChannel.pipeline().addLast(new NettyHeartBeatReqHandler(config));
+                    }
+                });
     }
 
     @Override
     protected void doConnect() throws Throwable {
-        try {
-            Bootstrap bootstrap = new Bootstrap();
-            final Serializer serializer = this.getSerializer();
-            final Deserializer deserializer = this.getDeserializer();
-            final int maxRecBytes = this.maxRecBytes();
-            bootstrap.group(this.boss).channel(NioSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
-                            socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
-                            socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
-                            socketChannel.pipeline().addLast(new NettyHandShakeReqHandler(config));
-                            socketChannel.pipeline().addLast(new NettyHeartBeatReqHandler(config));
-                        }
-                    });
-            ChannelFuture channelFuture = bootstrap.connect(this.config.getServerAddress(), this.config.getServerPort()).sync();
-            log.info("{}客户端【{}】已成功连接服务器【地址 -> {}，端口 -> {}】 成功！", Constant.LOG_PREFIX, this.config.getName(), this.config.getServerAddress(), this.config.getServerPort());
-            this.channel = channelFuture.channel();
-        } catch (Throwable t){
-            this.releaseResource();
-            throw t;
-        }
+        ChannelFuture channelFuture = this.bootstrap.connect(this.config.getServerAddress(), this.config.getServerPort());
+        channelFuture.addListener(new ConnectionListener(this));
+        this.channel = channelFuture.channel();
     }
 
     @Override
@@ -80,10 +77,22 @@ public class NettyClient extends AbstractClient {
         this.releaseResource();
     }
 
+    @Override
+    protected void processConnectException(Throwable t) {
+        super.processConnectException(t);
+        this.releaseResource();
+    }
+
     private void releaseResource(){
         if(this.boss != null){
             this.boss.shutdownGracefully().syncUninterruptibly();
             this.boss = null;
+        }
+        if(this.bootstrap != null){
+            this.bootstrap = null;
+        }
+        if(this.channel != null){
+            this.channel = null;
         }
     }
 
@@ -101,6 +110,38 @@ public class NettyClient extends AbstractClient {
     protected void finalize() throws Throwable {
         super.finalize();
         this.releaseResource();
+    }
+
+    private class ConnectionListener implements ChannelFutureListener {
+        private NettyClient client;
+        ConnectionListener(NettyClient client){
+            this.client = client;
+        }
+
+        @Override
+        public void operationComplete(ChannelFuture channelFuture) throws Exception {
+            if (!channelFuture.isSuccess()) {
+                new Thread(() -> {
+                    if(this.client.getConfig().getRetryPolicy().canRetry()){
+                        try {
+                            log.error("{}客户端【{}】连接服务器【地址 -> {}，端口 -> {}】异常！进行第{}次重连...",
+                                    Constant.LOG_PREFIX, this.client.getConfig().getName(), this.client.getConfig().getServerAddress(),
+                                    this.client.getConfig().getServerPort(), this.client.getConfig().getRetryPolicy().getRetryCount());
+                            this.client.doConnect();
+                        } catch (Throwable t){
+                            this.client.processConnectException(t);
+                        }
+                    } else {
+                        this.client.processConnectException(channelFuture.cause());
+                    }
+                }).start();
+            } else {
+                log.info("{}客户端【{}】连接服务器【地址 -> {}，端口 -> {}】成功！",
+                        Constant.LOG_PREFIX, this.client.getConfig().getName(), this.client.getConfig().getServerAddress(),
+                        this.client.getConfig().getServerPort());
+                this.client.getConfig().getRetryPolicy().reset();
+            }
+        }
     }
 
     public static void main(String[] args) throws Exception {

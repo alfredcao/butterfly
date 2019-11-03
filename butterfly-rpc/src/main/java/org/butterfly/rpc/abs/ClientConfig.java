@@ -1,5 +1,7 @@
 package org.butterfly.rpc.abs;
 
+import org.butterfly.rpc.abs.policy.RetryPolicy;
+
 import java.io.Serializable;
 
 /**
@@ -33,4 +35,10 @@ public interface ClientConfig extends Serializable {
     default int timeoutSeconds(){
         return 60;
     }
+
+    /**
+     * 获取重试策略
+     * @return 重试策略
+     */
+    RetryPolicy getRetryPolicy();
 }

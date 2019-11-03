@@ -3,6 +3,7 @@ package org.butterfly.rpc.component;
 import lombok.Getter;
 import org.butterfly.common.util.CheckUtil;
 import org.butterfly.rpc.abs.ClientConfig;
+import org.butterfly.rpc.abs.policy.RetryPolicy;
 
 /**
  * 客户端配置基类
@@ -16,6 +17,8 @@ public abstract class AbstractClientConfig implements ClientConfig {
     private String serverAddress;
     @Getter
     private int serverPort;
+    @Getter
+    private RetryPolicy retryPolicy;
 
 
     protected void setName(String name){
@@ -30,5 +33,10 @@ public abstract class AbstractClientConfig implements ClientConfig {
     protected void setServerPort(int serverPort){
         CheckUtil.checkNotNull(serverPort, "client config serverPort");
         this.serverPort = serverPort;
+    }
+
+    protected void setRetryPolicy(RetryPolicy retryPolicy){
+        CheckUtil.checkNotNull(retryPolicy, "client config retryPolicy");
+        this.retryPolicy = retryPolicy;
     }
 }

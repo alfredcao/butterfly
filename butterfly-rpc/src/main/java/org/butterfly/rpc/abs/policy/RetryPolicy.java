@@ -8,9 +8,15 @@ package org.butterfly.rpc.abs.policy;
 public interface RetryPolicy {
     /**
      * 是否可重试
-     * @return
+     * @return 是否可重试
      */
     boolean canRetry();
+
+    /**
+     * 获取重试次数
+     * @return 重试次数
+     */
+    int getRetryCount();
 
     /**
      * 重置

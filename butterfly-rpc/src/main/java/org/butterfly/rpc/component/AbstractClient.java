@@ -7,6 +7,7 @@ import org.butterfly.rpc.abs.Client;
 import org.butterfly.rpc.abs.ClientConfig;
 import org.butterfly.rpc.abs.codec.Deserializer;
 import org.butterfly.rpc.abs.codec.Serializer;
+import org.butterfly.rpc.model.constant.Constant;
 
 /**
  * 客户端实现基类
@@ -43,10 +44,10 @@ public abstract class AbstractClient implements Client {
                 this.doInit();
                 this.statusInfo.setStatus(Status.INIT);
                 return true;
-            } catch (Throwable e){
-                log.error("初始化客户端异常！", e);
+            } catch (Throwable t){
+                log.error("初始化客户端异常！", t);
                 this.statusInfo.setStatus(Status.INIT_EXCEPTION);
-                this.statusInfo.setCause(e);
+                this.statusInfo.setCause(t);
             }
         }
         return false;
@@ -62,13 +63,21 @@ public abstract class AbstractClient implements Client {
                 this.doConnect();
                 this.statusInfo.setStatus(Status.CONNECT);
                 return true;
-            } catch (Throwable e){
-                log.error("客户端连接服务器【地址 -> {}，端口 -> {}】异常！", this.config.getServerAddress(), this.config.getServerPort(), e);
-                this.statusInfo.setStatus(Status.CONNECT_EXCEPTION);
-                this.statusInfo.setCause(e);
+            } catch (Throwable t){
+                this.processConnectException(t);
             }
         }
         return false;
+    }
+
+    /**
+     * 处理连接异常
+     * @param t
+     */
+    protected void processConnectException(Throwable t){
+        log.error("{}客户端【{}】连接服务器【地址 -> {}，端口 -> {}】异常！不再进行重连操作！", Constant.LOG_PREFIX, this.config.getName(), this.config.getServerAddress(), this.config.getServerPort(), t);
+        this.statusInfo.setStatus(Status.CONNECT_EXCEPTION);
+        this.statusInfo.setCause(t);
     }
 
     @Override
@@ -81,13 +90,21 @@ public abstract class AbstractClient implements Client {
                 this.doDisconnect();
                 this.statusInfo.setStatus(Status.DISCONNECT);
                 return true;
-            } catch (Throwable e){
-                log.error("客户端断开连接异常！", e);
-                this.statusInfo.setStatus(Status.DISCONNECT_EXCEPTION);
-                this.statusInfo.setCause(e);
+            } catch (Throwable t){
+                this.processDisconnectException(t);
             }
         }
         return false;
+    }
+
+    /**
+     * 处理连接异常
+     * @param t
+     */
+    protected void processDisconnectException(Throwable t){
+        log.error("{}客户端【{}】断开连接服务器【地址 -> {}，端口 -> {}】异常！", Constant.LOG_PREFIX, this.config.getName(), this.config.getServerAddress(), this.config.getServerPort(), t);
+        this.statusInfo.setStatus(Status.DISCONNECT_EXCEPTION);
+        this.statusInfo.setCause(t);
     }
 
     /**
@@ -97,7 +114,7 @@ public abstract class AbstractClient implements Client {
     protected abstract void doInit() throws Throwable;
 
     /**
-     * 执行启动操作
+     * 执行连接操作
      * @throws Throwable
      */
     protected abstract void doConnect() throws Throwable;
