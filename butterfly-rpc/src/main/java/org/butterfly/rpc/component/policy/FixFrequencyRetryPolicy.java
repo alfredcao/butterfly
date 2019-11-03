@@ -1,5 +1,7 @@
 package org.butterfly.rpc.component.policy;
 
+import org.butterfly.common.util.CheckUtil;
+
 /**
  * 固定频率重试策略
  * @author alfredcao
@@ -21,6 +23,10 @@ public class FixFrequencyRetryPolicy extends SleepRetryPolicy {
     public FixFrequencyRetryPolicy(long fixSleepTimeMs, int maxRetryCount){
         super(maxRetryCount);
         this.fixSleepTimeMs = fixSleepTimeMs;
+    }
+
+    private void checkFixSleepTimeMs(long fixSleepTimeMs){
+        CheckUtil.checkPositive(fixSleepTimeMs, "fixSleepTimeMs必须为正数！");
     }
 
     @Override
