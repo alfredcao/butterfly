@@ -30,6 +30,7 @@ import org.butterfly.rpc.model.constant.Constant;
 public class NettyServer extends AbstractServer {
     private EventLoopGroup boss;
     private EventLoopGroup worker;
+    private ServerBootstrap serverBootstrap;
     private Channel channel;
 
     public NettyServer() {
@@ -41,34 +42,38 @@ public class NettyServer extends AbstractServer {
     }
 
     @Override
-    protected void doStart() throws Throwable {
+    protected void doInit() throws Throwable {
+        super.doInit();
         final ServerConfig config = this.config;
-
         this.boss = new NioEventLoopGroup();
         this.worker = new NioEventLoopGroup();
+        // 配置服务器
+        this.serverBootstrap = new ServerBootstrap();
+        final Serializer serializer = this.getSerializer();
+        final Deserializer deserializer = this.getDeserializer();
+        final int maxRecBytes = this.maxRecBytes();
+        this.serverBootstrap.group(this.boss, this.worker)
+                .channel(NioServerSocketChannel.class)
+                .childOption(ChannelOption.SO_BACKLOG, 1024)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .handler(new LoggingHandler())
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
+                        socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
+                        socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
+                        socketChannel.pipeline().addLast(new NettyHandShakeRespHandler(config));
+                        socketChannel.pipeline().addLast(new NettyHeartBeatRespHandler(config));
+                        socketChannel.pipeline().addLast(new NettyServerHandler(config));
+                    }
+                });
+    }
+
+    @Override
+    protected void doStart() throws Throwable {
         try {
-            // 配置服务器
-            ServerBootstrap serverBootstrap = new ServerBootstrap();
-            final Serializer serializer = this.getSerializer();
-            final Deserializer deserializer = this.getDeserializer();
-            final int maxRecBytes = this.maxRecBytes();
-            serverBootstrap.group(this.boss, this.worker)
-                    .channel(NioServerSocketChannel.class)
-                    .childOption(ChannelOption.SO_BACKLOG, 1024)
-                    .childOption(ChannelOption.TCP_NODELAY, true)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true)
-                    .handler(new LoggingHandler())
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(new ReadTimeoutHandler(config.timeoutSeconds()));
-                            socketChannel.pipeline().addLast(new NettyRpcMsgDecoder(maxRecBytes, deserializer));
-                            socketChannel.pipeline().addLast(new NettyRpcMsgEncoder(serializer));
-                            socketChannel.pipeline().addLast(new NettyHandShakeRespHandler(config));
-                            socketChannel.pipeline().addLast(new NettyHeartBeatRespHandler(config));
-                            socketChannel.pipeline().addLast(new NettyServerHandler(config));
-                        }
-                    });
             ChannelFuture channelFuture = serverBootstrap.bind(this.config.getPort()).sync();
             this.channel = channelFuture.channel();
             log.info("{}服务器【{}】已注册监听端口 {} 成功！", Constant.LOG_PREFIX, this.config.getName(), this.config.getPort());
@@ -76,7 +81,6 @@ public class NettyServer extends AbstractServer {
             this.releaseResource();
             throw t;
         }
-
     }
 
     @Override
