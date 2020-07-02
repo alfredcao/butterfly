@@ -71,7 +71,7 @@
         <!-- ehcache -->
         <version.net.sf.ehcache.ehcache>2.10.4</version.net.sf.ehcache.ehcache>
         <!-- db driver -->
-        <version.mysql-connector-java>6.0.6</version.mysql-connector-java>
+        <version.mysql-connector-java>8.0.16</version.mysql-connector-java>
         <!-- joda-time -->
         <version.joda-time>2.9.9</version.joda-time>
         <!-- org.bouncycastle -->
