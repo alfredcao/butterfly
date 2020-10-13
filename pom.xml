@@ -35,7 +35,7 @@
         <version.butterfly-common>1.0.0-SNAPSHOT</version.butterfly-common>
         <version.butterfly-rpc>1.0.0-SNAPSHOT</version.butterfly-rpc>
         <!-- test -->
-        <version.junit>4.12</version.junit>
+        <version.junit>4.13.1</version.junit>
         <!-- spring boot -->
         <version.spring-boot>2.1.5.RELEASE</version.spring-boot>
         <!-- mybatis-spring-boot-starter -->
