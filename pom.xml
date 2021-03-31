@@ -67,7 +67,7 @@
         <!-- c3p0 -->
         <version.c3p0>0.9.5.2</version.c3p0>
         <!-- guava -->
-        <version.com.google.guava.guava>28.0-jre</version.com.google.guava.guava>
+        <version.com.google.guava.guava>29.0-jre</version.com.google.guava.guava>
         <!-- ehcache -->
         <version.net.sf.ehcache.ehcache>2.10.4</version.net.sf.ehcache.ehcache>
         <!-- db driver -->
