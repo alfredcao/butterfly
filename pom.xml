@@ -44,7 +44,7 @@
         <!-- commons -->
         <version.commons-lang>2.6</version.commons-lang>
         <version.org.apache.commons.commons-lang3>3.9</version.org.apache.commons.commons-lang3>
-        <version.commons-io>2.4</version.commons-io>
+        <version.commons-io>2.7</version.commons-io>
         <version.commons-collections>3.2.1</version.commons-collections>
         <version.commons-beanutils>1.9.3</version.commons-beanutils>
         <version.org.apache.commons.commons-collections4>4.1</version.org.apache.commons.commons-collections4>
