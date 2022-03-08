@@ -51,7 +51,7 @@
         <!-- servlet -->
         <version.javax.servlet.servlet-api>2.5</version.javax.servlet.servlet-api>
         <!-- poi -->
-        <version.poi>3.9</version.poi>
+        <version.poi>5.2.1</version.poi>
         <!-- lombok -->
         <version.org.projectlombok.lombok>1.16.20</version.org.projectlombok.lombok>
         <!-- slf4j-api -->
