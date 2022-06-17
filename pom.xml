@@ -57,7 +57,7 @@
         <!-- slf4j-api -->
         <version.slf4j-api>1.7.25</version.slf4j-api>
         <!-- alibaba -->
-        <version.com.alibaba.fastjson>1.2.47</version.com.alibaba.fastjson>
+        <version.com.alibaba.fastjson>1.2.83</version.com.alibaba.fastjson>
         <!-- jsoup -->
         <version.jsoup>1.8.3</version.jsoup>
         <!-- jackson -->
