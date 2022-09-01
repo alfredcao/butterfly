@@ -59,7 +59,7 @@
         <!-- alibaba -->
         <version.com.alibaba.fastjson>1.2.47</version.com.alibaba.fastjson>
         <!-- jsoup -->
-        <version.jsoup>1.8.3</version.jsoup>
+        <version.jsoup>1.15.3</version.jsoup>
         <!-- jackson -->
         <version.com.fasterxml.jackson.core.jackson-core>2.9.8</version.com.fasterxml.jackson.core.jackson-core>
         <!-- jetbrains -->
